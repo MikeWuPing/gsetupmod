@@ -37,8 +37,8 @@
 ## 🚀 下载与使用
 
 - **Release 下载**（推荐）：https://github.com/MikeWuPing/gsetupmod/releases —— 含
-  - `gsetupmod.efi`：应用本体（UEFI 二进制）；
-  - `gsetupmod-boot-<版本>.iso`：**U 盘启动 ISO**——把 ISO 内容拷进任何 FAT32 U 盘（`EFI` 目录在盘根），或直接刻盘；
+  - `gsetupmod.efi`：应用本体（UEFI 二进制）；`gsetupmod-aarch64.efi`：ARM64 版；
+  - `gsetupmod-boot-<版本>.iso`：**双架构 U 盘启动 ISO（Ventoy 兼容）**——内置引导 ESP 适配 Ventoy/VMware/真机：拷进任何 FAT32 U 盘（`EFI` 目录在盘根）或直接刻盘；**使用 Ventoy 启动时必须选「正常模式」（Normal Mode），GRUB2 模式不受支持**；
   - 中/英文说明书（PDF/Word）。
 - **使用步骤**：
   1. 进入 BIOS/UEFI 设置，**关闭 Secure Boot**（安全启动会拒载未签名镜像；用后建议恢复）；

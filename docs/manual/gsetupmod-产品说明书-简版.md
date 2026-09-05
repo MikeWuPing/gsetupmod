@@ -154,7 +154,7 @@ gsetupmod 是一款运行在 UEFI 固件环境下的图形化固件设置浏览�
 
 **运行时 UI 开关。** 影响全局的行为开关，多数工具要么固定开启、要么改启动参数后重启应用。gsetupmod 把开关做进界面：设置对话框里拨动即生效，当前表单自动重载重新抓值，全程不退出应用。
 
-**无 Shell 直启。** 固件 Boot Manager 直接加载 `EFI\BOOT\BOOTX64.EFI`——U 盘启动盘一键做好，没有 Shell 的机器一样能用；唯一要求是关闭 Secure Boot。
+**无 Shell 直启。** 固件 Boot Manager 直接加载 `EFI\BOOT\BOOTX64.EFI`（ARM64 平台用 `BOOTAA64.EFI`）——U 盘启动盘一键做好，没有 Shell 的机器一样能用；唯一要求是关闭 Secure Boot。**Ventoy 兼容**：拷进 Ventoy U 盘请选「正常模式」，**GRUB2 模式不受支持**。
 
 ## 快速上手
 

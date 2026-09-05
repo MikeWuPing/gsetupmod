@@ -39,9 +39,10 @@ gsetupmod 是标准的 UEFI 应用（UEFI_APPLICATION），需要固件已进入
 
 **方式一：U 盘 / 启动 ISO（推荐给普通用户）**
 
-1. 运行 `tools\New-BootIso.ps1` 生成 `dist\gsetupmod-boot-<version>.iso`（ISO9660 + UDF + El Torito EFI 混合镜像），或直接把 ISO 内容拷进任何 FAT32 U 盘（`EFI` 目录在盘根）。
-2. BIOS/UEFI 设置中从该介质启动（UEFI 模式），固件直接加载 `EFI\BOOT\BOOTX64.EFI`——无需操作系统、无需 Shell。
+1. 运行 `tools\New-BootIso.ps1` 生成 `dist\gsetupmod-boot-<version>.iso`（ISO9660+Joliet+RR+UDF 桥 + 内嵌 ESP 的双保险结构，**Ventoy 兼容**；同一张盘带 `BOOTX64.EFI` 与 `BOOTAA64.EFI`，x86 与 ARM 平台都能引导），或直接把 ISO 内容拷进任何 FAT32 U 盘（`EFI` 目录在盘根）。
+2. BIOS/UEFI 设置中从该介质启动（UEFI 模式），固件直接加载 `EFI\BOOT\BOOTX64.EFI`（ARM 平台自动用 `BOOTAA64.EFI`）——无需操作系统、无需 Shell。
 3. **Secure Boot 须为关闭状态**：本镜像未签名，安全启动开启时固件会拒载。请在 UEFI 设置的 Security/Boot 页先关闭（各厂商入口不同），使用后建议恢复。ISO 内附 README.txt 面向最终用户重复这些步骤。
+4. **Ventoy 用户注意**：把它拷进 Ventoy U 盘使用，引导菜单中必须选**「正常模式」（Boot in normal mode）**；**GRUB2 模式不受支持**（对非标 ISO 为 Ventoy 已知限制），选错会导致无法引导。
 
 **方式二：Shell 手动加载**
 
