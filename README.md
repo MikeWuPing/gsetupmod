@@ -4,9 +4,9 @@
 >
 > **License**：免费授权个人用户使用；商业使用请联系作者（Author: Mike Wu）。商业用途包括但不限于：商用整机预装、付费服务分发、企业内网部署获利等场景。
 
-![主界面（深色档）](docs/manual/images/mm-boot_main.png)
+![主界面（深色档）](docs/manual/images/mm-boot_main-v138.png)
 
-![浅色档](docs/manual/images/light-main.png)
+![浅色档](docs/manual/images/light-main-v138.png)
 
 ## ✨ 重点推荐功能
 
@@ -28,25 +28,25 @@
 
 图例常驻菜单栏右上角。真机 NUC 数据实测：`Intel® Trusted Execution Technology`、`SGX Reserved Memory Size` 等标准 Setup 中不存在的项全部呈现。
 
-![三色表单实拍](docs/manual/images/mm-search_jump.png)
+![三色表单实拍](docs/manual/images/mm-search_jump-v138.png)
 
 ### 3. 搜索——"想开 VT 找遍 BIOS 没有"？搜 "VT"，两秒直达
 
 `Ctrl+F` 打开搜索面板，输入即过滤（大小写不敏感），**隐藏项同样可搜**，回车跳转目标行并 ACCENT 闪烁定位。NUC 真机数据输入 "VT" 立即命中「Intel® Trusted Execution Technology」与「Intel® VT for Directed I/O (VT-d)」。
 
-![搜索命中](docs/manual/images/mm-search_hits.png)
+![搜索命中](docs/manual/images/mm-search_hits-v138.png)
 
 ### 4. 悬停 1 秒——每个选项自带说明书
 
 设置项的固件帮助文本（范围、含义、警告）做成**悬停 1 秒弹出的小气泡**，移走即消失，不拦截点击。
 
-![悬停帮助](docs/manual/images/mm-tip_help.png)
+![悬停帮助](docs/manual/images/mm-tip_help-v138.png)
 
 ### 5. 深 / 浅两档毛玻璃外观（新）
 
 界面是 Win11 风格的**毛玻璃**：主窗体四周留边、浮在按运行时分辨率生成的渐变壁纸之上，铬面（品牌条 / 菜单栏 / 状态栏 / 左栏 / 页签条）半透明、内容区只留极淡底色，壁纸的渐变与模糊整个透出来。**深色（默认）与浅色两档**整档切换（壁纸、玻璃叠色、文字与标记色），选择写入配置文件 `\gsetupmod.cfg`，重启后生效。对话框与弹层的进出场还带**转场动效**（按对象类型选不同效果）。
 
-![设置对话框（动态回调 / 显示图例 / 界面语言 / 浅色主题）](docs/manual/images/settings.png)
+![设置对话框（动态回调 / 显示图例 / 界面语言 / 浅色主题）](docs/manual/images/settings-dlg-v138.png)
 
 ## 🚀 下载与使用
 
@@ -60,7 +60,7 @@
   3. 左栏选表单 → 悬停看帮助 → `Ctrl+F` 搜索 → 改完「文件 → 保存并退出」→ 重启生效。
 - 完整演示动图（32 帧：启动 → 表单 → 隐藏项 → 悬停帮助 → 搜索跳转 → 设置与动态回调 → 快照/导出 → 载入真机环境回放 → 编辑弹层 → 写回 → 浅色档收尾）：
 
-![演示 GIF](docs/manual/images/gsetupmod-demo.gif)
+![演示 GIF](docs/manual/images/gsetupmod-demo-v138.gif)
 
 ## 📚 文档
 
