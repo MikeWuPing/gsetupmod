@@ -1,6 +1,6 @@
 # gsetupmod 产品说明书（详版）
 
-适用于 BUILD 138（0.1.0.138）｜目标读者：进阶用户、固件工程师
+适用于 BUILD 148（0.1.0.148）｜目标读者：进阶用户、固件工程师
 
 ---
 
@@ -14,7 +14,7 @@ BIOS 的 Setup 界面并不是固件里画好的一张静态图片，而是由�
 
 ### 1.2 功能演示
 
-![功能演示](images/gsetupmod-demo-v138.gif)
+![功能演示](images/gsetupmod-demo-v148.gif)
 
 上图（32 帧 GIF，约 27 秒）演示了完整交互闭环：启动 → 进表单 → 行内控件（滑轨/胶囊）→ 下钻看隐藏项与置灰项 → 悬停帮助 → 搜索 "how" 命中并跳转 → 设置对话框（含动态回调）→ 快照与 .gus 导出 → 载入真机环境回放、搜 "VT" 跳转定位 → STRING / ONE_OF 编辑弹层 → 保存并写回；末段切到浅色档，同一套界面换亮色玻璃。
 
@@ -45,7 +45,7 @@ gsetupmod 是标准的 UEFI 应用（UEFI_APPLICATION），需要固件已进入
 
 同一份镜像在 ARM64（AArch64）平台上同样可用——固件自动取 `BOOTAA64.EFI`：
 
-![ARM64 平台运行](images/arm64-main-v138.png)
+![ARM64 平台运行](images/arm64-main-v148.png)
 4. **Ventoy 用户注意**：把它拷进 Ventoy U 盘使用，引导菜单中必须选**「正常模式」（Boot in normal mode）**；**GRUB2 模式不受支持**（对非标 ISO 为 Ventoy 已知限制），选错会导致无法引导。
 
 **方式二：Shell 手动加载**
@@ -63,7 +63,7 @@ gsetupmod 是标准的 UEFI 应用（UEFI_APPLICATION），需要固件已进入
 
 ## 三、界面总览（五大区域）
 
-![启动主界面](images/mm-boot_main-v138.png)
+![启动主界面](images/mm-boot_main-v148.png)
 
 上图是应用启动后的完整主界面，自上而下由五个区域构成。
 
@@ -73,11 +73,11 @@ gsetupmod 是标准的 UEFI 应用（UEFI_APPLICATION），需要固件已进入
 
 **左栏分组导航**：宽度 220px，所有 formset 按 Class 归入「系统 / 存储 / 显示 / 网络 / 输入 / 其他」分组，组内按标题排序，任意数量的 formset 都可以滚动到达。它的价值在于：数十个 formset 全部汇入一个界面后，仍然有清晰的入口层级。
 
-![左栏分组导航](images/nav-left-v138.png)
+![左栏分组导航](images/nav-left-v148.png)
 
 **表单区**（左侧栏之外的全部中部区域）：顶部是次级页签条（只列一级 form，详见 4.4），表单以 subtitle 分组的卡片形式渲染，值区按类型着色（勾选绿、数值蓝、普通白）。鼠标滚轮或键盘方向键驱动滚动。
 
-![表单区（毛玻璃透出壁纸）](images/form-rows-v138.png)
+![表单区（毛玻璃透出壁纸）](images/form-rows-v148.png)
 
 上图即表单区的常态：卡片只留一层极淡的底色，壁纸的渐变与模糊透上来，行文字与值区控件仍保持可读对比度。
 
@@ -103,7 +103,7 @@ gsetupmod 启动时经 `EFI_HII_DATABASE_PROTOCOL->ExportPackageLists` 枚举全
 
 被固件 `SUPPRESS_IF` 表达式判为"条件为真"的菜单项，标准 SetupBrowser 直接不显示。gsetupmod 对每个问题按**真实变量值 + 真实 IFR 字节**求值，凡被抑制的项一律正常渲染，标题加 **▓ 前缀**、整行套 **橙色**，且可以像普通项一样编辑。实测 OVMF 的 formmap 表单内 2 行隐藏（橙色）、1 行置灰，状态随变量值实时重求值——改掉触发条件，隐藏状态立刻联动。
 
-![隐藏项橙色展示](images/hidden-rows-v138.png)
+![隐藏项橙色展示](images/hidden-rows-v148.png)
 
 **三色语义**（菜单栏右上角图例同步说明）：
 - **白色 = 正常**：标准值，可查看可修改；
@@ -112,7 +112,7 @@ gsetupmod 启动时经 `EFI_HII_DATABASE_PROTOCOL->ExportPackageLists` 枚举全
 
 在 NUC 真机数据的 Security Features 表单里，橙色行（`Unattended BIOS Configuration`、`Intel® Trusted Execution Technology`、`SGX` 相关项……）在标准 Setup 页面里根本不出现；gsetupmod 把它们全部展示出来，且文本正常、值可读。
 
-![跳转定位后的三色表单](images/mm-search_jump-v138.png)
+![跳转定位后的三色表单](images/mm-search_jump-v148.png)
 
 **它解决什么问题**：OEM 调试项、被功能开关条件性隐藏的配置，在标准 BIOS 界面里永远不存在。这些项恰恰是进阶用户最想动的地方——隐藏项可见可改，是 gsetupmod 最核心的差异化能力，别的软件没有。
 
@@ -126,13 +126,13 @@ gsetupmod 启动时经 `EFI_HII_DATABASE_PROTOCOL->ExportPackageLists` 枚举全
 
 页签条只列**一级 form**（入口 form + 无 GOTO/REF 指向的孤儿 form）；二级 form 经行内 **▸ 前缀的 GOTO/REF 行**点击进入，进入后页签条末尾追加**临时页签**并高亮当前 form，导航栈随之压栈。
 
-![下钻二级 form](images/drill-form-v138.png)
+![下钻二级 form](images/drill-form-v148.png)
 
 回退有两条路：按 **ESC** 逐级弹栈，或点击画面 **「← 返回」按钮**（栈深大于 1 时出现在横幅区左端的圆形按钮，栈深 1 时不渲染）。跨 formset 的 `EFI_IFR_REF` 跳转一并支持，跳转时完整切换表单上下文，弹栈回退同样成立。被抑制的 form 不进页签，但只要被 GOTO/REF 指向，仍可经行点击进入探索。BUILD 122 起：下钻态点击自己的临时页签**不再清空下钻栈**（同 form 短路由），ESC 仍逐级回退。
 
-![返回按钮](images/back-button-v138.png)
+![返回按钮](images/back-button-v148.png)
 
-![Tab 焦点高亮](images/tab-focus-v138.png)
+![Tab 焦点高亮](images/tab-focus-v148.png)
 
 **它解决什么问题**：formset 里几十个 form 平铺成页签不可维护；对齐标准 SetupBrowser 的"一级可见、二级经行进入、ESC 回退"心智模型，既符合固件工程师的习惯，又让隐藏 form 依然可达——层级清晰与探索自由兼得。
 
@@ -140,7 +140,7 @@ gsetupmod 启动时经 `EFI_HII_DATABASE_PROTOCOL->ExportPackageLists` 枚举全
 
 带 `EFI_IFR_FLAG_CALLBACK`（0x04）标志的问题（如 BIOS vendor ID、驱动动态维护的展示项）在标准浏览器中由驱动的 `ConfigAccess->Callback(RETRIEVE)` 实时填充。gsetupmod 开启动态回调后，会按 varstore GUID+Name 匹配驱动实例，对每个动态问题调用 RETRIEVE 抓真实值显示，失败时回退静态值。动态行以暗色 **「D」角标**标记；BUILD 121 起**可编辑**（标准 Setup 语义）；仅 varstore 不可读的行保持只读（无静态存储/读值失败——改它只会把零快照写回固件）。
 
-![动态项 D 角标](images/dyn-badges-v138.png)
+![动态项 D 角标](images/dyn-badges-v148.png)
 
 开启方式有两种：启动参数 `-Dyn`，或界面「设置」对话框中的动态回调开关（详见 4.13）。该功能为**实验性**：UEFI 没有异常隔离机制，真实驱动回调若崩溃会导致整机挂死，因此默认关闭。
 
@@ -152,23 +152,23 @@ gsetupmod 启动时经 `EFI_HII_DATABASE_PROTOCOL->ExportPackageLists` 枚举全
 
 1. **CHECKBOX**：行内 toggle 开关（滑轨动画），点击滑轨或按 Space/Enter 翻转，无需进入弹层。
 
-![CHECKBOX 行内开关](images/edit-checkbox-v138.png)
+![CHECKBOX 行内开关](images/edit-checkbox-v148.png)
 
 2. **ONE_OF**（选项数 ≤ 3）：值区渲染为胶囊分段控件，点击目标段即切换；选项更多时按 Enter/点击打开选项列表弹层。
 
-![ONE_OF 胶囊分段](images/edit-oneof-v138.png)
+![ONE_OF 胶囊分段](images/edit-oneof-v148.png)
 
-![ONE_OF 选项列表弹层](images/edit-oneof-list-v138.png)
+![ONE_OF 选项列表弹层](images/edit-oneof-list-v148.png)
 
 上图：选项超过 3 项时打开的列表弹层（当前项以强调色标出），点选即提交。
 
 3. **NUMERIC**：行内 `[-] 值 [+]` 步进器；按 Enter 打开数值弹层（显示 min/max/step 与当前值，退格清空后输入新值，OK 提交）。
 
-![NUMERIC 数值弹层](images/edit-numeric-v138.png)
+![NUMERIC 数值弹层](images/edit-numeric-v148.png)
 
 4. **STRING**：按 Enter 打开文本输入面板（当前仅支持 ASCII 输入），确认后提交。
 
-![STRING 文本面板](images/edit-string-v138.png)
+![STRING 文本面板](images/edit-string-v148.png)
 
 任何修改立即写入内存模型并**全量重求值**全部表达式，界面同步刷新——某个值一变，受它条件控制的其它项进出隐藏/置灰状态立刻可见。所有改动先落在内存（Dirty 标记），统一在「保存并退出」时写回。
 
@@ -178,7 +178,7 @@ gsetupmod 启动时经 `EFI_HII_DATABASE_PROTOCOL->ExportPackageLists` 枚举全
 
 大部分设置项都带一段固件帮助文本；标准 Setup 把它放在页面某个信息区，看不看得到全看缘分。gsetupmod 改为**悬停选项 1 秒弹出浮动气泡**（Windows 11 惯例时长），移走即消失：
 
-![悬停帮助气泡](images/mm-tip_help-v138.png)
+![悬停帮助气泡](images/mm-tip_help-v148.png)
 
 实现细节：LVGL 9 的 HOVER_OVER/LEAVE 事件只在指针"释放"路径派发（纯移动从不触发——实测死代码），因此改经 100ms 定时器巡检指针位置逐行命检；悬停同一行 ≥1000ms 且帮助文本非空才显示；气泡锚定行下方（接近屏幕底缘自动翻转到行上方）、不拦截点击；按下冻结（防点击后停 1 秒误弹影响操作）。帮助文本来源为固件 STRING 包的 HelpToken（回放模式下从 .gus 的字符串包抓取，与搜索索引同源）。
 
@@ -188,13 +188,13 @@ gsetupmod 启动时经 `EFI_HII_DATABASE_PROTOCOL->ExportPackageLists` 枚举全
 
 按 **Ctrl+F**（或菜单栏「搜索」按钮）打开搜索面板，输入即实时过滤（大小写不敏感），索引覆盖**全部 formset**（隐藏项同样入索引，灰项、动态项均可命中）。结果列表带 form 路径，点击结果跳转到目标行，并以主题色（ACCENT）**两拍闪烁**提示位置。
 
-![搜索面板](images/search-v138.png)
+![搜索面板](images/search-v148.png)
 
-![跳转闪烁](images/search-jump-v138.png)
+![跳转闪烁](images/search-jump-v148.png)
 
 **真机实例——搜 VT**：载入 NUC 真机 dump 后输入 "VT"，面板即时命中两条——「Intel® Trusted Execution Technology」与「Intel® VT for Directed I/O (VT-d)」，回车即定位到 Security Features 表单。这正是"想开 VT 找遍 BIOS 却没有"的答案：选项多半在，只是被藏进了深层页面。
 
-![VT 命中列表](images/mm-search_hits-v138.png)
+![VT 命中列表](images/mm-search_hits-v148.png)
 
 **它解决什么问题**：数十个 formset、上千个问题层层嵌套，肉眼翻找如同大海捞针。搜索把"我记得这个名字"直接变成"到达那一行"，尤其对隐藏项——它在标准界面里根本不存在，搜索是唯一入口。
 
@@ -204,11 +204,11 @@ gsetupmod 启动时经 `EFI_HII_DATABASE_PROTOCOL->ExportPackageLists` 枚举全
 
 写回有严格的 Dirty 门控：无未保存修改时「放弃修改」置灰不可点；「退出」时若有修改，弹三键确认框（保存并退出 / 放弃并退出 / 取消）。
 
-![Dirty 门控](images/discard-gate-v138.png)
+![Dirty 门控](images/discard-gate-v148.png)
 
-![写回结果](images/writeback-v138.png)
+![写回结果](images/writeback-v148.png)
 
-![退出确认对话框](images/quit-v138.png)
+![退出确认对话框](images/quit-v148.png)
 
 图：存在未保存修改时按 ESC 或「文件 → 退出」弹出的三键确认框（保存并退出 / 放弃并退出 / 取消）。
 
@@ -218,7 +218,7 @@ gsetupmod 启动时经 `EFI_HII_DATABASE_PROTOCOL->ExportPackageLists` 枚举全
 
 「文件 → 另存为快照」把全部 varstore 的当前值写入 `\GSETUPMOD.SNP` 文本文件；「从快照载入」读取该文件并恢复全部存储值，再经保存并退出一次写回固件。
 
-![快照另存为](images/snapshot-dlg-v138.png)
+![快照另存为](images/snapshot-dlg-v148.png)
 
 **它解决什么问题**：调参过程越兴奋越容易改出无法启动的组合。快照让"改前存一份、改坏就恢复"成为一条指令的事，适合固件调试这类高风险试错场景。
 
@@ -226,11 +226,11 @@ gsetupmod 启动时经 `EFI_HII_DATABASE_PROTOCOL->ExportPackageLists` 枚举全
 
 「文件 → 导出 HII 环境」把**整台机器的 HII 环境**导出为 `.gus` 文件——包括全部 package list 原始字节、当时的变量值，以及 GUS2 格式特有的**动态项抓取值**（DynValues 节，开关开启时逐个 RETRIEVE 抓入）。默认文件名 `HiiSnap_YYYYMMDD_HHMMSS.gus`。
 
-![导出 HII 环境](images/gus2-export-v138.png)
+![导出 HII 环境](images/gus2-export-v148.png)
 
 「载入 HII 环境」从文件重建应用进入**回放模式**：整体切换到快照环境，状态栏出现「回放 |」标记；回放**禁写**——保存并退出、从快照载入、导出 HII 环境一律置灰，编辑只进内存不进 NVRAM，避免把外机的数据误写回本机。「退出回放」随时切回活体视图。旧版 GUS1 快照兼容载入（动态项显示占位）。
 
-![回放模式](images/replay-v138.png)
+![回放模式](images/replay-v148.png)
 
 **它解决什么问题**：真机报障时"现场"带不走——HII 数据、变量值、驱动回调状态都只存在于那台机器的内存里。把环境导出成文件，任何地方都能载入、逐表单离线分析、复现真机所见，这是排障链条上最省时间的一环。
 
@@ -246,11 +246,11 @@ gsetupmod 启动时经 `EFI_HII_DATABASE_PROTOCOL->ExportPackageLists` 枚举全
 
 **浅色主题**即深浅外观切换（详述见 4.14）：翻转后把选择写入设置文件 `\gsetupmod.cfg` 并提示，随后应用退出——外观是全局装配的，重启后整体生效（与语言切换同一套 UX）。
 
-![设置对话框（暗色）](images/settings-dlg-v138.png)
+![设置对话框（暗色）](images/settings-dlg-v148.png)
 
-![动态回调开启](images/settings-toggle-on-v138.png)
+![动态回调开启](images/settings-toggle-on-v148.png)
 
-![表单重载](images/settings-reload-v138.png)
+![表单重载](images/settings-reload-v148.png)
 
 **它解决什么问题**：把实验性能力与全局外观都放在显式开关后面——要真值、要图例、要亮色界面，都由使用者在界面上决定，不必记启动参数。
 
@@ -270,15 +270,15 @@ BUILD 134 起界面有**深色（默认）与浅色两档**，整档一起切：
 
 切换入口：**设置对话框第三行「浅色主题」**。翻转后立即把选择写进设置文件 `\gsetupmod.cfg`（与语言选择同一个文件），弹提示并退出应用——外观是全局装配的，**重启后生效**。也就是说，把配置文件带在身边，插到别的机器上启动也是你要的那一档。
 
-![深色档（默认）](images/mm-boot_main-v138.png)
+![深色档（默认）](images/mm-boot_main-v148.png)
 
-![浅色档](images/light-main-v138.png)
+![浅色档](images/light-main-v148.png)
 
 浅色档表单与设置对话框：
 
-![浅色档表单区](images/light-form-v138.png)
+![浅色档表单区](images/light-form-v148.png)
 
-![浅色档设置对话框](images/light-settings-v138.png)
+![浅色档设置对话框](images/light-settings-v148.png)
 
 **它解决什么问题**：机房、暗房、强光下办公桌——同一块屏在不同环境里舒服的亮度不一样。深色是长时间盯屏与暗环境的默认，浅色适合投影与强光；既然是固件工具、常常要现场拍照记录，一档可切换的外观比"只有深色"更省事，而且选择会跟着配置文件走。
 
@@ -300,9 +300,11 @@ BUILD 134 起鼠标支持覆盖三条通路：
 
 | 操作 | 行为 |
 |---|---|
-| Tab | 焦点在可交互对象间循环（表单行 → 弹层控件 → 对话框按钮 → 菜单项） |
-| Shift+Tab | 反向循环焦点 |
-| ↑ / ↓ | 表单内上 / 下移动焦点行 |
+| Tab | **换区**：左栏导航 → 表单区 → 菜单栏 → 回左栏（BUILD 145 起菜单栏走到最后一个按钮再按 Tab 即绕回左栏） |
+| Shift+Tab | 反向换区（在菜单栏第一个按钮上按，回表单区） |
+| ↑ / ↓ | **区内移动**：左栏里换 formset 条目；表单区里换焦点行；菜单栏里不适用（用 Tab 换按钮）；**展开的菜单下拉里等同 Tab**（见下） |
+| Tab（对话框内） | 在本对话框自己的控件之间循环（列表整体算一个 Tab 位，列表**行**用 ↑↓ 走） |
+| ← / → | 表单内焦点行首/行尾（编辑弹层内为文本移动） |
 | Enter | 激活焦点项：打开编辑弹层 / 进入 ▸ GOTO 行 / 确认对话框；弹层内提交 |
 | Space | CHECKBOX 行内翻转（等价 Enter 的行内路径） |
 | ESC | 关闭弹层与对话框；导航栈深 > 1 时逐级回退；栈深 1 时退出应用 |
@@ -315,6 +317,10 @@ BUILD 134 起鼠标支持覆盖三条通路：
 | 鼠标悬停 / 按压 | 目标高亮与按压态反馈 |
 
 行为细则：灰项焦点永不落下；仅 varstore 不可读的行不弹编辑层；栈深 1 时 ESC 退出应用，有未保存修改先弹确认框。
+
+**纯键盘怎么走（BUILD 139 起，145 起补全）**：开机默认焦点落在**左栏**（若当前表单没有可操作的设置项，比如开机落在空表单上），↑↓ 直接换 formset、Enter 切换——不用先按 Tab 找焦点。随后 Tab 依次换到**表单区**（↑↓ 换行、Enter 编辑、Space 翻转勾选、PgUp/PgDn 整页翻）和**菜单栏**（Tab 在文件/搜索/设置/帮助/语言之间换，Enter 打开菜单，ESC 回表单），菜单栏走到最后一个按钮再按 Tab **绕回左栏**——三个焦点区首尾相接成环，任何一区都不会"进得去出不来"。鼠标点到哪里，焦点区就跟到哪里——**ESC 的含义始终跟着你此刻所在的区域**：在左栏是"退回表单区"，在表单里是"返回上级表单 / 退出"。
+
+**弹层里的 Tab**：**展开的菜单下拉**属于列表，Tab 与 Shift+Tab 等同 ↓ 与 ↑（在菜单项之间移动，自动跳过置灰项），ESC 关闭下拉；**对话框**（写回预览 / 关于 / 确认 / 设置 / 搜索面板 / 文件对话框）里的 Tab 只在**该对话框自己的控件**之间循环，不会跑到背后的主界面上，列表整体算一个 Tab 位、列表**行**用 ↑↓ 走——写回预览里按 Tab 到「确定」回车即完成保存（BUILD 147/148 起）。
 
 ---
 
