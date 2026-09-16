@@ -10,19 +10,23 @@
 
 ## ✨ 重点推荐功能
 
-### 1. ⌨️ 纯键盘：Tab 焦点在三个区之间**首尾成环**（本次更新）
+### 1. 🖱️ 指针与触摸更稳（本次更新）
+
+**针对客户反馈的"鼠标插上也不动、触摸屏也没反应"和"鼠标乱动"，这一版加固了三处：** 指针实例的选择分了层——固件提供的实例永远优先于应用自己内建的兜底实例，不再出现"插上鼠标反而把触摸屏顶掉"；绝对坐标按设备声明的实际量程归一，面板量程带偏置或在旋转屏上也不会再整体偏移；选中设备后做一次复位，并新增两条诊断日志（首个数据到达的轮询序号、长时间无数据的提示），现场一抓串口就能判断是"设备没发布"还是"设备不产出"。
+
+### 2. ⌨️ 纯键盘：Tab 焦点在三个区之间**首尾成环**
 
 **客户拿纯键盘跑了一整轮，报回来的问题这次全部修完。** 焦点区（左栏 → 表单区 → 菜单栏）现在连成一个环：**菜单栏走到最后一个按钮再按 Tab，直接绕回左栏**；Shift+Tab 反向同一条路，任何一区都不会"进得去出不来"。**展开的菜单下拉里，Tab 与 Shift+Tab 等同 ↓ 与 ↑**（在菜单项之间移动，自动跳过置灰项），ESC 关掉下拉。
 
 **对话框里的 Tab 只在对话框自己的控件之间循环**，不会跑到背后暗掉的主界面上——写回预览、设置、搜索面板、文件对话框都一样；**列表整体算一个 Tab 位，列表里的行用 ↑↓ 走**（文件对话框因此从 20 个 Tab 位收到 5 个：盘符 / 文件列表 / 文件名 / 确定 / 取消）。
 
-### 2. 🖱️ 鼠标：**固件没有鼠标驱动，插上鼠标照样能用**
+### 3. 🖱️ 鼠标：**固件没有鼠标驱动，插上鼠标照样能用**
 
 多数固件工具在"固件本身不带 USB 鼠标驱动"的机器上（精简固件、部分 ARM 平台、裸跑在虚拟机里的固件）会变成纯键盘工具——鼠标插着也没反应。**gsetupmod 探测不到指针设备时，会自己加载一个内建 USB HID 鼠标驱动**，按标准 UEFI 指针协议发布给界面，插上普通 USB 鼠标即可移动、点击、悬停。
 
 **滚轮也一并接通**：翻长表单不必再按住拖动；不带滚轮的鼠标仍可按住左键拖动滚动。固件自带指针驱动时直接用（两条路径都实现了滚轮 Z 轴解析），状态栏中间的提示写的就是这两条。
 
-### 3. 被固件隐藏的选项——全部展示，还能改
+### 4. 被固件隐藏的选项——全部展示，还能改
 
 标准 BIOS 只显示"厂商愿意给你看"的那一面：被 `SUPPRESS_IF` 规则隐藏的选项（想开 VT 却找不到入口的经典场景）、被 `GRAY_OUT_IF` 禁用的选项，从数据层面就被抹掉了。gsetupmod 对隐藏规则按真实 IFR 字节求值，三种颜色一目了然：
 
@@ -36,19 +40,19 @@
 
 ![三色表单实拍](docs/manual/images/mm-search_jump-v148.png)
 
-### 4. 搜索——"想开 VT 找遍 BIOS 没有"？搜 "VT"，两秒直达
+### 5. 搜索——"想开 VT 找遍 BIOS 没有"？搜 "VT"，两秒直达
 
 `Ctrl+F` 打开搜索面板，输入即过滤（大小写不敏感），**隐藏项同样可搜**，回车跳转目标行并 ACCENT 闪烁定位。NUC 真机数据输入 "VT" 立即命中「Intel® Trusted Execution Technology」与「Intel® VT for Directed I/O (VT-d)」。
 
 ![搜索命中](docs/manual/images/mm-search_hits-v148.png)
 
-### 5. 悬停 1 秒——每个选项自带说明书
+### 6. 悬停 1 秒——每个选项自带说明书
 
 设置项的固件帮助文本（范围、含义、警告）做成**悬停 1 秒弹出的小气泡**，移走即消失，不拦截点击。
 
 ![悬停帮助](docs/manual/images/mm-tip_help-v148.png)
 
-### 6. 深 / 浅两档毛玻璃外观
+### 7. 深 / 浅两档毛玻璃外观
 
 界面是 Win11 风格的**毛玻璃**：主窗体四周留边、浮在按运行时分辨率生成的渐变壁纸之上，铬面（品牌条 / 菜单栏 / 状态栏 / 左栏 / 页签条）半透明、内容区只留极淡底色，壁纸的渐变与模糊整个透出来。**深色（默认）与浅色两档**整档切换（壁纸、玻璃叠色、文字与标记色），选择写入配置文件 `\gsetupmod.cfg`，重启后生效。对话框与弹层的进出场还带**转场动效**（按对象类型选不同效果）。
 
@@ -79,7 +83,8 @@
 
 ## 📋 主要特性
 
-- **纯键盘全可用**（本次更新）：Tab 在左栏 / 表单区 / 菜单栏之间**成环换区**（菜单栏末按钮绕回左栏），↑↓ 区内移动，下拉内 Tab 等同 ↓↑，**对话框内 Tab 只在框内控件之间循环**；
+- **指针/触摸更稳**（本次更新）：指针实例分层（固件实例优先于内建兜底实例）、绝对坐标按设备实际量程归一、选中后复位一次并带两条诊断日志；
+- **纯键盘全可用**：Tab 在左栏 / 表单区 / 菜单栏之间**成环换区**（菜单栏末按钮绕回左栏），↑↓ 区内移动，下拉内 Tab 等同 ↓↑，**对话框内 Tab 只在框内控件之间循环**；
 - **鼠标全支持**：**固件无鼠标驱动时由内建 USB HID 驱动接管**；滚轮滚动；无滚轮可按住左键拖动；
 - **毛玻璃界面 + 深/浅两档主题**（选择持久化到 `\gsetupmod.cfg`），对话框与弹层带转场动效；
 - **完整 HII 枚举**：汇总全部固件驱动注册的设置表单，几十个 formset 一个界面；
@@ -120,7 +125,8 @@
 
 **gsetupmod — a UEFI firmware settings browser that shows you every option your BIOS hides.**
 
-- **Fully keyboard-drivable (this update).** Tab cycles left navigation → form area → menu bar as a **closed loop** (Tab on the last menu button wraps back to the left column; Shift+Tab reverses it), arrows move within a pane, Tab inside an open menu behaves like ↓/↑, and **inside a dialog Tab stays within that dialog's own controls** (a list counts as one stop; its rows are walked with ↑/↓).
+- **Steadier pointer & touch input (this update).** Pointer instances are tiered so firmware-provided devices always outrank the app's own built-in fallback, absolute coordinates are normalized over the device's declared range, and a one-shot reset plus two diagnostic log lines make field diagnosis straightforward.
+- **Fully keyboard-drivable.** Tab cycles left navigation → form area → menu bar as a **closed loop** (Tab on the last menu button wraps back to the left column; Shift+Tab reverses it), arrows move within a pane, Tab inside an open menu behaves like ↓/↑, and **inside a dialog Tab stays within that dialog's own controls** (a list counts as one stop; its rows are walked with ↑/↓).
 - **Mouse always works — even when the firmware ships no mouse driver.** When no pointer device is found, gsetupmod loads its own built-in USB HID mouse driver and publishes it as a standard UEFI pointer, so an ordinary USB mouse just works; the **scroll wheel** is wired through as well (drag-to-scroll still there for wheel-less mice).
 - Native UEFI application: no OS, no Shell — the firmware loads `EFI\BOOT\BOOTX64.EFI` (or `BOOTAA64.EFI` on ARM64) directly from a FAT32 USB stick/ISO.
 - Rebuilds the whole BIOS Setup from the firmware's live HII/IFR data, **including items the firmware hides** (orange `▓`) or disables (purple) — all readable and modifiable.
