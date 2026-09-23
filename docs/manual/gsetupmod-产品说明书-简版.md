@@ -4,7 +4,7 @@
 
 gsetupmod 是一款运行在 UEFI 固件环境下的图形化固件设置浏览器（原生 UEFI 应用，无需操作系统、不依赖 Shell）。它读取固件内部的 HII/IFR 数据——描述全部设置表单的数据结构与指令——以 Windows 11 风格的毛玻璃界面，把 BIOS 的 setup 界面完整重建出来。它的核心价值在于：**不用重启进 BIOS，就能查看并修改全部固件设置，包括被固件刻意隐藏的选项**。
 
-![功能演示](images/gsetupmod-demo-v148.gif)
+![功能演示](images/gsetupmod-demo.gif)
 
 上图（32 帧演示 GIF，约 27 秒）走的是"启动 → 进表单 → 切控件 → 下钻看隐藏项 → 悬停帮助 → 搜索跳转 → 设置与动态回调 → 快照/导出 → 载入真机环境回放 → 编辑弹层 → 写回"这条主线，末尾切到浅色档收尾。下面逐一介绍功能。
 
@@ -12,29 +12,29 @@ gsetupmod 是一款运行在 UEFI 固件环境下的图形化固件设置浏览�
 
 1. **完整 HII 枚举**：启动后自动枚举固件中的全部配置表单，把分散在多个固件驱动里的设置汇入同一个界面，无需逐个寻找入口。
 
-   ![主界面](images/mm-boot_main-v148.png)
+   ![主界面](images/mm-boot_main.png)
 
    图：启动后的主界面——品牌条、菜单栏（含三色图例）、左栏分组导航、表单列表与状态栏一屏呈现。
 
-   ![表单区](images/form-rows-v148.png)
+   ![表单区](images/form-rows.png)
 
    图：进入表单后——卡片只留极淡底色，壁纸的渐变与模糊透过内容区，行文字与控件仍保持可读对比度。
 
 2. **隐藏项展示（独家）**：被固件 SUPPRESS_IF 规则（"满足条件就不显示"的隐藏规则）抑制的菜单项，按真实逻辑求值后照常展示，以橙色加 ▓ 前缀标记——标准 setup 根本看不到这些项。**三种颜色各有语义**：白色=正常可修改、紫色=固件中原不可改（GRAY_OUT_IF，值可读）、橙色=固件中原本隐藏（SUPPRESS_IF）。图例常驻菜单栏右上角。
 
-   ![隐藏项橙色显示](images/hidden-rows-v148.png)
+   ![隐藏项橙色显示](images/hidden-rows.png)
 
-   图：橙色行即被固件隐藏、标准 setup 不展示的设置项。（实拍三色场景见 `images/mm-search_jump-v148.png`——Intel NUC 的 Security Features 表单，隐藏的 TXT/SGX 项全部呈现。）
+   图：橙色行即被固件隐藏、标准 setup 不展示的设置项。（实拍三色场景见 `images/mm-search_jump.png`——Intel NUC 的 Security Features 表单，隐藏的 TXT/SGX 项全部呈现。）
 
 3. **悬停帮助（新）**：大部分设置项带固件帮助文本。gsetupmod 把鼠标悬停在选项上 **1 秒即弹出帮助气泡**，移走消失——想开某个功能却不知道它的含义/范围时，悬停一下就是答案。
 
-   ![悬停帮助气泡](images/mm-tip_help-v148.png)
+   ![悬停帮助气泡](images/mm-tip_help.png)
 
    图：悬停 Intel® Trusted Execution Technology 行 1 秒，帮助文本气泡浮出。
 
 4. **搜索**：Ctrl+F 打开搜索面板，输入即过滤（大小写不敏感），点击结果跳转到目标行并强调色两拍闪烁；索引覆盖全部表单，**隐藏项同样可搜**——"想开 VT 找遍 BIOS 没有"时，搜 "VT" 直达 Intel® Trusted Execution Technology / VT-d。
 
-   ![搜索命中示例](images/mm-search_hits-v148.png)
+   ![搜索命中示例](images/mm-search_hits.png)
 
    图：NUC 真机数据输入 "VT" 即时命中两条，回车跳转入 Security Features 表单。
 
@@ -42,109 +42,109 @@ gsetupmod 是一款运行在 UEFI 固件环境下的图形化固件设置浏览�
 
 6. **层级导航**：页签条陈列一级表单，点 ▸ 行进入二级表单，ESC 或「← 返回」逐级回退；下钻后点自己的页签也不会丢历史（BUILD 122）。
 
-   ![页签条层级](images/tabs-hierarchy-v148.png)
+   ![页签条层级](images/tabs-hierarchy.png)
 
    图：页签条承载表单层级，一级常驻、二级随浏览栈变化。
 
-   ![进入二级表单](images/drill-form-v148.png)
+   ![进入二级表单](images/drill-form.png)
 
    图：点 ▸ 行进入二级表单，隐藏项同样可从行点击进入。
 
-   ![返回按钮](images/back-button-v148.png)
+   ![返回按钮](images/back-button.png)
 
    图：画面左上角「← 返回」按钮配合 ESC 逐级回退。
 
 7. **动态项回调（独家）**：由固件驱动动态填写的回调项（如 vendor ID），开启动态回调后调用真实驱动回调抓取实际值显示，失败回退静态值；动态行带暗色「D」角标。
 
-   ![动态项 D 角标](images/dyn-badges-v148.png)
+   ![动态项 D 角标](images/dyn-badges.png)
 
    图：带「D」角标的动态行，显示的是固件驱动的真实回调值。
 
 8. **图形化编辑控件**：勾选框滑轨 toggle、3 项以内单选胶囊分段、数值 [-] 值 [+] 步进器，复杂类型按 ENTER 打开编辑弹层。
 
-   ![勾选框滑轨](images/edit-checkbox-v148.png)
+   ![勾选框滑轨](images/edit-checkbox.png)
 
    图：勾选框以滑轨 toggle 呈现，鼠标键盘均可切换。
 
-   ![数值步进器](images/edit-numeric-v148.png)
+   ![数值步进器](images/edit-numeric.png)
 
    图：数值项用 [-] 值 [+] 步进器编辑，也可在弹层直接输入。
 
-   ![单选胶囊分段](images/edit-oneof-v148.png)
+   ![单选胶囊分段](images/edit-oneof.png)
 
    图：3 项以内的单选以胶囊分段点击切换。
 
-   ![单选列表弹层](images/edit-oneof-list-v148.png)
+   ![单选列表弹层](images/edit-oneof-list.png)
 
    图：选项更多时打开的列表弹层，点选即提交。
 
-   ![文本编辑弹层](images/edit-string-v148.png)
+   ![文本编辑弹层](images/edit-string.png)
 
    图：字符串类型按 ENTER 打开文本编辑弹层。
 
 9. **左栏分组导航**：表单按 Class 分组（系统/存储/显示/网络/输入等），左栏逐组导航，任意数量表单滚动可达。
 
-   ![左栏分组导航](images/nav-left-v148.png)
+   ![左栏分组导航](images/nav-left.png)
 
    图：左栏按类别分组陈列全部表单，右侧浏览选中表单。
 
 10. **写回（核心价值）**：修改经固件变量接口（SetVariable，固件持久保存配置的通道）真实写回，重启后生效；**只写回你实际改过的变量**（未动过的整体跳过——改一个选项绝不会全量刷新三十个变量）；保存/放弃/退出均带未保存修改（Dirty）确认。
 
-    ![写回设置](images/writeback-v148.png)
+    ![写回设置](images/writeback.png)
 
     图：保存时把改动经固件变量接口写回，重启后生效。
 
-    ![确认退出对话框](images/quit-v148.png)
+    ![确认退出对话框](images/quit.png)
 
     图：退出前弹出确认对话框，明确选择保存或放弃。
 
-    ![放弃修改门控](images/discard-gate-v148.png)
+    ![放弃修改门控](images/discard-gate.png)
 
     图：存在未保存修改时，放弃操作会被门控确认拦截。
 
 11. **快照**：把全部设置的当前值保存到 `\GSETUPMOD.SNP` 文件，随时载入恢复，一次写回固件。
 
-    ![快照对话框](images/snapshot-dlg-v148.png)
+    ![快照对话框](images/snapshot-dlg.png)
 
     图：快照对话框统一管理保存与恢复。
 
 12. **.gus 环境快照（独家）**：把整个 HII 环境导出为 .gus 文件（含动态项抓取值），可再载入进入回放模式离线浏览；旧版 GUS1 快照兼容。
 
-    ![导出 .gus 文件](images/gus2-export-v148.png)
+    ![导出 .gus 文件](images/gus2-export.png)
 
     图：把真实机器的固件环境导出为 .gus 文件随身携带。
 
-    ![回放模式](images/replay-v148.png)
+    ![回放模式](images/replay.png)
 
     图：载入 .gus 后进入回放模式，离线浏览表单环境。
 
 13. **设置对话框**：菜单栏「设置」按钮打开设置对话框，四行开关——动态回调（切换即时生效，自动重载当前表单重新抓值，无需重启应用）、显示图例、界面语言（中/英）、浅色主题（见下条）。
 
-    ![设置对话框](images/settings-dlg-v148.png)
+    ![设置对话框](images/settings-dlg.png)
 
     图：设置对话框（动态回调 / 显示图例 / 浅色主题）。
 
-    ![动态回调开启](images/settings-toggle-on-v148.png)
+    ![动态回调开启](images/settings-toggle-on.png)
 
     图：开关打开后动态项按真实回调值显示。
 
-    ![设置后重载表单](images/settings-reload-v148.png)
+    ![设置后重载表单](images/settings-reload.png)
 
     图：切换开关后当前表单自动重载重新抓值。
 
 14. **深色 / 浅色主题（毛玻璃双档）**：界面是**毛玻璃**风格——主窗体四周留边、浮在渐变壁纸之上，铬面（品牌条/菜单栏/状态栏/左栏/页签条）半透明、内容区淡淡一层底，壁纸的渐变与模糊整个透出来。默认深色（深蓝灰烟熏玻璃），另有浅色档（Win11 亮色族），整档一起换（壁纸、玻璃叠色、文字与标记色）。切换写在设置文件 `\gsetupmod.cfg` 里，重启后生效——把配置带在身边，换台机器启动还是你要的那一档。
 
-    ![深色档主界面](images/mm-boot_main-v148.png)
+    ![深色档主界面](images/mm-boot_main.png)
 
     图：深色档（默认）——留边、圆角、投影与透出的壁纸。
 
-    ![浅色档主界面](images/light-main-v148.png)
+    ![浅色档主界面](images/light-main.png)
 
     图：浅色档——同一套界面布局换亮色玻璃。
 
 15. **鼠标支持（含固件无驱动时的内建驱动）**：滚轮滚动表单（不用再按住拖动）；**若本机固件根本没有鼠标驱动，程序会自己加载一个内建 USB HID 鼠标驱动**——插上 USB 鼠标即可用，不用管固件支不支持。
 
-    ![浅色档表单区](images/light-form-v148.png)
+    ![浅色档表单区](images/light-form.png)
 
     图：浅色档下的表单区（毛玻璃透出壁纸，文字对比度不变）。
 
@@ -152,13 +152,13 @@ gsetupmod 是一款运行在 UEFI 固件环境下的图形化固件设置浏览�
 
     画面低于 800×600 下限时给出橙色提示并继续（只在小屏上才见得到——启动时的模式协商会先把显示顶到 ≥1280×800）。同一份镜像在 ARM64（AArch64）平台上同样可用：
 
-    ![ARM64 平台运行](images/arm64-main-v148.png)
+    ![ARM64 平台运行](images/arm64-main.png)
 
 17. **品牌条**：顶栏 logo、名称、版本号与实时时钟，右上角作者署名（左带三色图例）。
 
 18. **键盘/鼠标全支持**：**Tab 换区**（左栏导航 → 表单区 → 菜单栏，来回循环）、**↑↓ 区内移动**（左栏换 formset / 表单区换行），Enter 激活、ESC 逐级返回与退出，鼠标点击、滚轮滚动、悬停（1 秒帮助）全覆盖，Ctrl+F 搜索、Ctrl+S 保存。**开机即可用键盘**：默认焦点落在左栏（空表单时也能直接 ↑↓ 换 formset），鼠标点到哪里焦点区就跟到哪里。
 
-    ![Tab 焦点高亮](images/tab-focus-v148.png)
+    ![Tab 焦点高亮](images/tab-focus.png)
 
     图：Tab 键循环焦点，当前焦点项高亮。
 

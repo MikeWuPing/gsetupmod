@@ -10,9 +10,11 @@
 
 ## ✨ 重点推荐功能
 
-### 1. 🖱️ 指针与触摸更稳（本次更新）
+### 1. 🖱️ 一类"光标画得出、却钉住不动"的机型修好了（本次更新）
 
-**针对客户反馈的"鼠标插上也不动、触摸屏也没反应"和"鼠标乱动"，这一版加固了三处：** 指针实例的选择分了层——固件提供的实例永远优先于应用自己内建的兜底实例，不再出现"插上鼠标反而把触摸屏顶掉"；绝对坐标按设备声明的实际量程归一，面板量程带偏置或在旋转屏上也不会再整体偏移；选中设备后做一次复位，并新增两条诊断日志（首个数据到达的轮询序号、长时间无数据的提示），现场一抓串口就能判断是"设备没发布"还是"设备不产出"。
+**客户报过一种怪现象：鼠标图标画得出来、位置也在，就是不跟着手走**——多半停在屏幕正中间。根因不在应用侧：一部分固件发布的**相对指针设备不填"每毫米计数"（Resolution）这个元数据字段**，而规范把 0 定义为"该轴不存在"。旧逻辑照规范办事，于是把每一个位移都算成了 0，光标自然纹丝不动。
+
+这一版起，**元数据缺失时按 1 计数 = 1 像素兜底**，位移照常生效，并打一条 WARN 日志——现场抓一次串口就能分清是"设备没发布"还是"字段没填"。前两版的加固一并保留：指针实例分层（固件实例优先于内建兜底实例，不会再出现"插上鼠标反而把触摸屏顶掉"）、绝对坐标按设备声明的实际量程归一（面板量程带偏置或旋转屏不再整体偏移）、选中设备后复位一次，以及两条现场诊断日志。
 
 ### 2. ⌨️ 纯键盘：Tab 焦点在三个区之间**首尾成环**
 
@@ -62,7 +64,7 @@
 
 - **Release 下载**（推荐）：https://github.com/MikeWuPing/gsetupmod/releases —— 含
   - `gsetupmod.efi`：应用本体（x64 的 UEFI 二进制）；`gsetupmod-aarch64.efi`：ARM64 版；
-  - `gsetupmod-boot-<版本>.iso`：**双架构 U 盘启动 ISO（Ventoy 兼容）**——内置引导 ESP 适配 Ventoy/VMware/真机：拷进任何 FAT32 U 盘（`EFI` 目录在盘根）或直接刻盘；**使用 Ventoy 启动时必须选「正常模式」（Normal Mode），GRUB2 模式不受支持**；
+  - `gsetupmod-boot-<版本>.iso`：**双架构 U 盘启动 ISO（Ventoy 兼容）**——内置引导 ESP 适配 Ventoy/VMware/真机：拷进任何 FAT32 U 盘（`EFI` 目录在盘根）或直接刻盘；**本版把内嵌引导 ESP 精简到 5 MB，整张 ISO 从 20.5 MB 减到 10.5 MB**；**使用 Ventoy 启动时请选菜单第一项「正常模式」（Normal Mode）**（已验证可用；GRUB2 模式暂不受支持）；
   - 中文说明书（Word，简版 + 详版；在线 Markdown 见下方「文档」）。
 - **使用步骤**：
   1. 进入 BIOS/UEFI 设置，**关闭 Secure Boot**（安全启动会拒载未签名镜像；用后建议恢复）；
@@ -83,7 +85,7 @@
 
 ## 📋 主要特性
 
-- **指针/触摸更稳**（本次更新）：指针实例分层（固件实例优先于内建兜底实例）、绝对坐标按设备实际量程归一、选中后复位一次并带两条诊断日志；
+- **指针/触摸更稳**（本次更新）：固件没填"每毫米计数"（`Resolution=0`）时按 1 计数 = 1 像素兜底，位移不再被整体丢弃（"光标画得出却钉住不动"那一类）；指针实例分层（固件实例优先于内建兜底实例）、绝对坐标按设备实际量程归一、选中后复位一次并带两条诊断日志；
 - **纯键盘全可用**：Tab 在左栏 / 表单区 / 菜单栏之间**成环换区**（菜单栏末按钮绕回左栏），↑↓ 区内移动，下拉内 Tab 等同 ↓↑，**对话框内 Tab 只在框内控件之间循环**；
 - **鼠标全支持**：**固件无鼠标驱动时由内建 USB HID 驱动接管**；滚轮滚动；无滚轮可按住左键拖动；
 - **毛玻璃界面 + 深/浅两档主题**（选择持久化到 `\gsetupmod.cfg`），对话框与弹层带转场动效；
@@ -125,10 +127,10 @@
 
 **gsetupmod — a UEFI firmware settings browser that shows you every option your BIOS hides.**
 
-- **Steadier pointer & touch input (this update).** Pointer instances are tiered so firmware-provided devices always outrank the app's own built-in fallback, absolute coordinates are normalized over the device's declared range, and a one-shot reset plus two diagnostic log lines make field diagnosis straightforward.
+- **Steadier pointer & touch input (this update).** Some firmware publishes relative pointer devices without the counts-per-millimetre metadata (`Resolution`), and the spec defines 0 as "this axis does not exist" — the old logic dutifully zeroed every movement, so the cursor was painted but never moved. The app now falls back to 1 count = 1 pixel and logs a warning. The earlier hardening stays: tiered pointer instances (firmware-provided devices always outrank the app's own built-in fallback), absolute coordinates normalized over the device's declared range, and a one-shot reset plus two diagnostic log lines.
 - **Fully keyboard-drivable.** Tab cycles left navigation → form area → menu bar as a **closed loop** (Tab on the last menu button wraps back to the left column; Shift+Tab reverses it), arrows move within a pane, Tab inside an open menu behaves like ↓/↑, and **inside a dialog Tab stays within that dialog's own controls** (a list counts as one stop; its rows are walked with ↑/↓).
 - **Mouse always works — even when the firmware ships no mouse driver.** When no pointer device is found, gsetupmod loads its own built-in USB HID mouse driver and publishes it as a standard UEFI pointer, so an ordinary USB mouse just works; the **scroll wheel** is wired through as well (drag-to-scroll still there for wheel-less mice).
-- Native UEFI application: no OS, no Shell — the firmware loads `EFI\BOOT\BOOTX64.EFI` (or `BOOTAA64.EFI` on ARM64) directly from a FAT32 USB stick/ISO.
+- Native UEFI application: no OS, no Shell — the firmware loads `EFI\BOOT\BOOTX64.EFI` (or `BOOTAA64.EFI` on ARM64) directly from a FAT32 USB stick/ISO. The boot ISO's embedded ESP is slimmed to 5 MB — the whole ISO shrank from 20.5 MB to 10.5 MB.
 - Rebuilds the whole BIOS Setup from the firmware's live HII/IFR data, **including items the firmware hides** (orange `▓`) or disables (purple) — all readable and modifiable.
 - **Frosted-glass UI with dark and light theme packs** (persisted to `\gsetupmod.cfg`), plus entry transitions for dialogs and overlays.
 - **Ctrl+F search** indexes everything (hidden items too): type "VT" to jump straight to Intel Virtualization Technology even if the standard Setup never shows it.
