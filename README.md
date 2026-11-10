@@ -4,17 +4,25 @@
 >
 > **License**：免费授权个人用户使用；商业使用请联系作者（Author: Mike Wu）。商业用途包括但不限于：商用整机预装、付费服务分发、企业内网部署获利等场景。
 
-![主界面（深色档）](docs/manual/images/mm-boot_main-v148.png)
+![主界面（深色档）](docs/manual/images/mm-boot_main-v179.png)
 
 ![浅色档](docs/manual/images/light-main-v148.png)
 
 ## ✨ 重点推荐功能
 
-### 1. 🖱️ 一类"光标画得出、却钉住不动"的机型修好了（本次更新）
+### 1. 🔍 想开虚拟化却找不到？现在可以用"你脑子里的词"搜了（本次更新）
 
-**客户报过一种怪现象：鼠标图标画得出来、位置也在，就是不跟着手走**——多半停在屏幕正中间。根因不在应用侧：一部分固件发布的**相对指针设备不填"每毫米计数"（Resolution）这个元数据字段**，而规范把 0 定义为"该轴不存在"。旧逻辑照规范办事，于是把每一个位移都算成了 0，光标自然纹丝不动。
+**客户最常卡住的一步不是"改不了"，而是"找不到"。** 想开 CPU 虚拟化，脑子里是"虚拟化"，固件里写的却是 `Intel Virtualization Technology` / `VT-d` / `SVM Mode` —— 词对不上，精确搜索一条都不中；而多数人连 `VT` 这个缩写都不知道。
 
-这一版起，**元数据缺失时按 1 计数 = 1 像素兜底**，位移照常生效，并打一条 WARN 日志——现场抓一次串口就能分清是"设备没发布"还是"字段没填"。前两版的加固一并保留：指针实例分层（固件实例优先于内建兜底实例，不会再出现"插上鼠标反而把触摸屏顶掉"）、绝对坐标按设备声明的实际量程归一（面板量程带偏置或旋转屏不再整体偏移）、选中设备后复位一次，以及两条现场诊断日志。
+这一版把搜索拆成**两个并排的常驻按钮**：`精确查找`（原来的子串搜索，行为逐字不变）与 `模糊查找`，按哪个就是哪种。
+
+- **模糊模式**做归一化（大小写、连字符、点号：`VT-x` = `VT x` = `VTX`，`X.M.P` = `XMP`）、词边界匹配、拼写容错（编辑距离 ≤1，`Virtulization` 也能中）、同义词扩展与相关度排序；
+- **模糊结果恒为精确结果的超集** —— 原词子串命中永远排在最前，只多不少；
+- **51 个概念 chip** 分 9 组铺在第二行，**中文只显示在按钮上，一个字都不用打**：虚拟化 / 超线程 / 超频 / 内存频率 / 安全启动 / 风扇 / 充电阈值 / SGX-TDX / SR-IOV …… 点一下即用整组别名检索（点「虚拟化」= 同时搜 `VT-x` `VT-d` `SVM` `IOMMU` `英特尔虚拟化技术`）；chip 条两端有 `<` `>` 按钮，滚到内容边界即停，不会滚进空白；
+- **扫描有进度**：结果区底部一条进度条 + 状态 `模糊查找中 N/M…`，输入 140 ms 防抖（连打只查最后一次，不逐键重扫），大机型不再"像死机"；
+- 词表**内置在程序里**：不联网、不需要中文输入法、不依赖任何外部文件。
+
+真机 NUC 数据实测同一个词 `virtualization`：**精确 2 条**（Virtualization Technology、VT-d），**模糊 3 条**（多出 Trusted Execution Technology，走同义词别名）—— 差异一眼可见。
 
 ### 2. ⌨️ 纯键盘：Tab 焦点在三个区之间**首尾成环**
 
@@ -40,25 +48,27 @@
 
 图例常驻菜单栏右上角。真机 NUC 数据实测：`Intel® Trusted Execution Technology`、`SGX Reserved Memory Size` 等标准 Setup 中不存在的项全部呈现。
 
-![三色表单实拍](docs/manual/images/mm-search_jump-v148.png)
+![三色表单实拍](docs/manual/images/hidden-rows-v179.png)
 
-### 5. 搜索——"想开 VT 找遍 BIOS 没有"？搜 "VT"，两秒直达
+### 5. 搜索——"想开 VT 找遍 BIOS 没有"？搜 "VT" 两秒直达，不知道 VT 也能搜
 
-`Ctrl+F` 打开搜索面板，输入即过滤（大小写不敏感），**隐藏项同样可搜**，回车跳转目标行并 ACCENT 闪烁定位。NUC 真机数据输入 "VT" 立即命中「Intel® Trusted Execution Technology」与「Intel® VT for Directed I/O (VT-d)」。
+`Ctrl+F` 打开搜索面板，输入即过滤，**隐藏项同样可搜**，回车跳转目标行并 ACCENT 闪烁定位。面板分三行：第一行输入框 + `精确查找` / `模糊查找` 两个按钮 + 常驻状态（`[精确查找] N 项命中`，0 命中也显示）+ 关闭；第二行 51 个概念 chip（两端 `<` `>` 滚动）；第三行结果列表。
 
-![搜索命中](docs/manual/images/mm-search_hits-v148.png)
+索引覆盖问题行、跳转行、帮助文本，以及 `My CPU Speed is` 这类纯文本行 —— 所以搜 `CPU` 也能命中那些只作说明出现的行。
+
+![搜 virtualization：精确 2 条 / 模糊 3 条](docs/manual/images/mm-search_hits-v179.png)
 
 ### 6. 悬停 1 秒——每个选项自带说明书
 
 设置项的固件帮助文本（范围、含义、警告）做成**悬停 1 秒弹出的小气泡**，移走即消失，不拦截点击。
 
-![悬停帮助](docs/manual/images/mm-tip_help-v148.png)
+![悬停帮助](docs/manual/images/mm-tip_help-v179.png)
 
 ### 7. 深 / 浅两档毛玻璃外观
 
 界面是 Win11 风格的**毛玻璃**：主窗体四周留边、浮在按运行时分辨率生成的渐变壁纸之上，铬面（品牌条 / 菜单栏 / 状态栏 / 左栏 / 页签条）半透明、内容区只留极淡底色，壁纸的渐变与模糊整个透出来。**深色（默认）与浅色两档**整档切换（壁纸、玻璃叠色、文字与标记色），选择写入配置文件 `\gsetupmod.cfg`，重启后生效。对话框与弹层的进出场还带**转场动效**（按对象类型选不同效果）。
 
-![设置对话框（动态回调 / 显示图例 / 界面语言 / 浅色主题）](docs/manual/images/settings-dlg-v148.png)
+![设置对话框（动态回调 / 显示图例 / 界面语言 / 浅色主题）](docs/manual/images/settings-dlg-v179.png)
 
 ## 🚀 下载与使用
 
@@ -70,9 +80,9 @@
   1. 进入 BIOS/UEFI 设置，**关闭 Secure Boot**（安全启动会拒载未签名镜像；用后建议恢复）；
   2. 从 U 盘/ISO 启动（UEFI 模式），固件直接加载应用，几秒进入界面；
   3. 左栏选表单 → 悬停看帮助 → `Ctrl+F` 搜索 → 改完「文件 → 保存并退出」→ 重启生效。
-- 完整演示动图（32 帧：启动 → 表单 → 隐藏项 → 悬停帮助 → 搜索跳转 → 设置与动态回调 → 快照/导出 → 载入真机环境回放 → 编辑弹层 → 写回 → 浅色档收尾）：
+- 完整演示动图（8 帧，载入真机 dump 后的巡览：主界面 → 悬停帮助 → 精确搜索 2 条 → 切模糊 3 条 → chip 横向卷动 → 跳转高亮 → 三色表 → 设置对话框；477 KB）：
 
-![演示 GIF](docs/manual/images/gsetupmod-demo-v148.gif)
+![演示 GIF](docs/manual/images/gsetupmod-demo-v179.gif)
 
 ## 📚 文档
 
@@ -85,13 +95,14 @@
 
 ## 📋 主要特性
 
-- **指针/触摸更稳**（本次更新）：固件没填"每毫米计数"（`Resolution=0`）时按 1 计数 = 1 像素兜底，位移不再被整体丢弃（"光标画得出却钉住不动"那一类）；指针实例分层（固件实例优先于内建兜底实例）、绝对坐标按设备实际量程归一、选中后复位一次并带两条诊断日志；
+- **模糊搜索**（本次更新）：`精确查找` / `模糊查找` 两个并排按钮、51 个概念 chip（9 组）、同义词表内置不联网、模糊结果恒为精确的超集、扫描带进度条与 140 ms 防抖；
+- **指针/触摸更稳**：固件没填"每毫米计数"（`Resolution=0`）时按 1 计数 = 1 像素兜底，位移不再被整体丢弃（"光标画得出却钉住不动"那一类）；指针实例分层（固件实例优先于内建兜底实例）、绝对坐标按设备实际量程归一、选中后复位一次并带两条诊断日志；
 - **纯键盘全可用**：Tab 在左栏 / 表单区 / 菜单栏之间**成环换区**（菜单栏末按钮绕回左栏），↑↓ 区内移动，下拉内 Tab 等同 ↓↑，**对话框内 Tab 只在框内控件之间循环**；
 - **鼠标全支持**：**固件无鼠标驱动时由内建 USB HID 驱动接管**；滚轮滚动；无滚轮可按住左键拖动；
 - **毛玻璃界面 + 深/浅两档主题**（选择持久化到 `\gsetupmod.cfg`），对话框与弹层带转场动效；
 - **完整 HII 枚举**：汇总全部固件驱动注册的设置表单，几十个 formset 一个界面；
 - **隐藏项展示+修改**（独家）、三色语义、真实 IFR 表达式求值；
-- **全量搜索**（隐藏项可搜）、**悬停帮助**；
+- **全量搜索**（隐藏项可搜，索引含问题行 / 跳转行 / 帮助文本 / 纯文本行）、**悬停帮助**；
 - **图形化编辑**：勾选滑轨 / 单选胶囊与列表 / 数值步进器 / 文本面板，鼠标键盘双通道；
 - **按需写回**：只写实际改过的变量（未改动整体跳过），逐项报告，`Security Violation` 点名；
 - **快照与 .gus**：全量快照一键恢复；整机 HII 环境导出成 `.gus` 文件，任何机器载入回放（离线分析、回放禁写）；
@@ -127,13 +138,14 @@
 
 **gsetupmod — a UEFI firmware settings browser that shows you every option your BIOS hides.**
 
-- **Steadier pointer & touch input (this update).** Some firmware publishes relative pointer devices without the counts-per-millimetre metadata (`Resolution`), and the spec defines 0 as "this axis does not exist" — the old logic dutifully zeroed every movement, so the cursor was painted but never moved. The app now falls back to 1 count = 1 pixel and logs a warning. The earlier hardening stays: tiered pointer instances (firmware-provided devices always outrank the app's own built-in fallback), absolute coordinates normalized over the device's declared range, and a one-shot reset plus two diagnostic log lines.
+- **Fuzzy search (this update).** Exact and fuzzy are now two side-by-side buttons. The fuzzy pass normalizes case and punctuation (`VT-x` = `VT x` = `VTX`), enforces word boundaries, tolerates one-character typos, expands through a built-in 51-concept synonym table (9 groups, Chinese + English labels rendered as clickable chips — no IME, no network) and ranks by relevance. Results are **always a superset of the exact pass**, and the scan shows a progress bar with 140 ms debounce. Fuzzy hits never drop an exact hit.
+- **Steadier pointer & touch input.** Some firmware publishes relative pointer devices without the counts-per-millimetre metadata (`Resolution`), and the spec defines 0 as "this axis does not exist" — the old logic dutifully zeroed every movement, so the cursor was painted but never moved. The app now falls back to 1 count = 1 pixel and logs a warning. The earlier hardening stays: tiered pointer instances (firmware-provided devices always outrank the app's own built-in fallback), absolute coordinates normalized over the device's declared range, and a one-shot reset plus two diagnostic log lines.
 - **Fully keyboard-drivable.** Tab cycles left navigation → form area → menu bar as a **closed loop** (Tab on the last menu button wraps back to the left column; Shift+Tab reverses it), arrows move within a pane, Tab inside an open menu behaves like ↓/↑, and **inside a dialog Tab stays within that dialog's own controls** (a list counts as one stop; its rows are walked with ↑/↓).
 - **Mouse always works — even when the firmware ships no mouse driver.** When no pointer device is found, gsetupmod loads its own built-in USB HID mouse driver and publishes it as a standard UEFI pointer, so an ordinary USB mouse just works; the **scroll wheel** is wired through as well (drag-to-scroll still there for wheel-less mice).
 - Native UEFI application: no OS, no Shell — the firmware loads `EFI\BOOT\BOOTX64.EFI` (or `BOOTAA64.EFI` on ARM64) directly from a FAT32 USB stick/ISO. The boot ISO's embedded ESP is slimmed to 5 MB — the whole ISO shrank from 20.5 MB to 10.5 MB.
 - Rebuilds the whole BIOS Setup from the firmware's live HII/IFR data, **including items the firmware hides** (orange `▓`) or disables (purple) — all readable and modifiable.
 - **Frosted-glass UI with dark and light theme packs** (persisted to `\gsetupmod.cfg`), plus entry transitions for dialogs and overlays.
-- **Ctrl+F search** indexes everything (hidden items too): type "VT" to jump straight to Intel Virtualization Technology even if the standard Setup never shows it.
+- **Ctrl+F search** indexes everything (hidden items, help text and plain text rows too): type "VT" to jump straight to Intel Virtualization Technology even if the standard Setup never shows it — or type "virtualization" if you never knew the acronym.
 - **Hover 1 s** to see each option's own firmware help text.
 - **Write-back only what you changed**; per-item error report (firmware-locked variables are named, e.g. `Security Violation`); full snapshot & `.gus` env export/replay for offline analysis.
 - **X64 / AArch64** from the same sources; boot media carries both. Resolution-adaptive (≥1280×800, fills the available area on high-resolution screens, graceful fallback below 800×600).
