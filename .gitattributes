@@ -1,0 +1,11 @@
+# 发布件：二进制一律不做行尾/编码转换
+*.efi    binary
+*.iso    binary
+*.docx   binary
+*.pdf    binary
+*.png    binary
+*.gif    binary
+*.bin    binary
+# 文本：统一 LF（GitHub 与各平台一致）
+*.md     text eol=lf
+*.txt    text eol=lf

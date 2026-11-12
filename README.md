@@ -10,7 +10,7 @@
 
 ## ✨ 重点推荐功能
 
-### 1. 🔍 想开虚拟化却找不到？现在可以用"你脑子里的词"搜了（本次更新）
+### 1. 🔍 想开虚拟化却找不到？现在可以用"你脑子里的词"搜了
 
 **客户最常卡住的一步不是"改不了"，而是"找不到"。** 想开 CPU 虚拟化，脑子里是"虚拟化"，固件里写的却是 `Intel Virtualization Technology` / `VT-d` / `SVM Mode` —— 词对不上，精确搜索一条都不中；而多数人连 `VT` 这个缩写都不知道。
 
@@ -43,14 +43,28 @@
 | 颜色 | 语义 |
 |---|---|
 | 白 | 正常设置，可修改 |
-| 紫 | 固件中原本不可改（灰显），值可读 |
+| 紫 | 固件中原本不可改（灰显），值可读；**可在红色警示确认后修改** |
 | 橙 | 固件中原本隐藏（SUPPRESS_IF），▓ 标记，可浏览可修改 |
 
 图例常驻菜单栏右上角。真机 NUC 数据实测：`Intel® Trusted Execution Technology`、`SGX Reserved Memory Size` 等标准 Setup 中不存在的项全部呈现。
 
 ![三色表单实拍](docs/manual/images/hidden-rows-v179.png)
 
-### 5. 搜索——"想开 VT 找遍 BIOS 没有"？搜 "VT" 两秒直达，不知道 VT 也能搜
+### 5. 置灰项也能改——先读警示，再手输 YES（本次新增）
+
+固件把某些项判灰（`GRAY_OUT_IF`），意思是"当前状态下不建议动"——可标准 Setup 既不解释原因，也不给你满足前置条件的入口。gsetupmod 把选择权交回给你，但把代价讲在前面：每次改动前弹**红色警示框**，写明可能造成**系统无法启动、安全功能失效或数据丢失**，并明确"本软件不对改动结果负责"。**必须手动输入 `YES` 再按「确定」**才放行；输错不生效，值也不会变。
+
+![置灰项编辑警示框](docs/manual/images/gray-warning-v185.png)
+
+「清除 TPM」这类不可逆项还要再升一级：要求输入 `ERASE`，框里直接写明会清除 TPM 密钥、加密磁盘可能无法解锁且不可恢复。
+
+![清除 TPM 的二次确认](docs/manual/images/clear-tpm-warning-v185.png)
+
+改过的灰项在保存预览里**标红**，写回前再确认一次。对话框三个控件（输入框 / 确定 / 取消）都在 Tab 循环内，纯键盘环境照样可用。
+
+**这句话必须说清楚**：这些项被固件判灰是有原因的，强行修改的风险由你自己承担，**改坏概不负责**。动手前先「另存为快照」备份一份。
+
+### 6. 搜索——"想开 VT 找遍 BIOS 没有"？搜 "VT" 两秒直达，不知道 VT 也能搜
 
 `Ctrl+F` 打开搜索面板，输入即过滤，**隐藏项同样可搜**，回车跳转目标行并 ACCENT 闪烁定位。面板分三行：第一行输入框 + `精确查找` / `模糊查找` 两个按钮 + 常驻状态（`[精确查找] N 项命中`，0 命中也显示）+ 关闭；第二行 51 个概念 chip（两端 `<` `>` 滚动）；第三行结果列表。
 
@@ -58,13 +72,13 @@
 
 ![搜 virtualization：精确 2 条 / 模糊 3 条](docs/manual/images/mm-search_hits-v179.png)
 
-### 6. 悬停 1 秒——每个选项自带说明书
+### 7. 悬停 1 秒——每个选项自带说明书
 
 设置项的固件帮助文本（范围、含义、警告）做成**悬停 1 秒弹出的小气泡**，移走即消失，不拦截点击。
 
 ![悬停帮助](docs/manual/images/mm-tip_help-v179.png)
 
-### 7. 深 / 浅两档毛玻璃外观
+### 8. 深 / 浅两档毛玻璃外观
 
 界面是 Win11 风格的**毛玻璃**：主窗体四周留边、浮在按运行时分辨率生成的渐变壁纸之上，铬面（品牌条 / 菜单栏 / 状态栏 / 左栏 / 页签条）半透明、内容区只留极淡底色，壁纸的渐变与模糊整个透出来。**深色（默认）与浅色两档**整档切换（壁纸、玻璃叠色、文字与标记色），选择写入配置文件 `\gsetupmod.cfg`，重启后生效。对话框与弹层的进出场还带**转场动效**（按对象类型选不同效果）。
 
@@ -75,7 +89,7 @@
 - **Release 下载**（推荐）：https://github.com/MikeWuPing/gsetupmod/releases —— 含
   - `gsetupmod.efi`：应用本体（x64 的 UEFI 二进制）；`gsetupmod-aarch64.efi`：ARM64 版；
   - `gsetupmod-boot-<版本>.iso`：**双架构 U 盘启动 ISO（Ventoy 兼容）**——内置引导 ESP 适配 Ventoy/VMware/真机：拷进任何 FAT32 U 盘（`EFI` 目录在盘根）或直接刻盘；**本版把内嵌引导 ESP 精简到 5 MB，整张 ISO 从 20.5 MB 减到 10.5 MB**；**使用 Ventoy 启动时请选菜单第一项「正常模式」（Normal Mode）**（已验证可用；GRUB2 模式暂不受支持）；
-  - 中文说明书（Word，简版 + 详版；在线 Markdown 见下方「文档」）。
+  - 中文说明书（**Word + PDF**，简版 + 详版；在线 Markdown 见下方「文档」）。
 - **使用步骤**：
   1. 进入 BIOS/UEFI 设置，**关闭 Secure Boot**（安全启动会拒载未签名镜像；用后建议恢复）；
   2. 从 U 盘/ISO 启动（UEFI 模式），固件直接加载应用，几秒进入界面；
@@ -102,10 +116,11 @@
 - **毛玻璃界面 + 深/浅两档主题**（选择持久化到 `\gsetupmod.cfg`），对话框与弹层带转场动效；
 - **完整 HII 枚举**：汇总全部固件驱动注册的设置表单，几十个 formset 一个界面；
 - **隐藏项展示+修改**（独家）、三色语义、真实 IFR 表达式求值；
+- **置灰项可编辑**（本次新增）：红色警示框 + 手输 `YES`（清除 TPM 类需 `ERASE`），改动过的项在写回预览里标红；
 - **全量搜索**（隐藏项可搜，索引含问题行 / 跳转行 / 帮助文本 / 纯文本行）、**悬停帮助**；
 - **图形化编辑**：勾选滑轨 / 单选胶囊与列表 / 数值步进器 / 文本面板，鼠标键盘双通道；
 - **按需写回**：只写实际改过的变量（未改动整体跳过），逐项报告，`Security Violation` 点名；
-- **快照与 .gus**：全量快照一键恢复；整机 HII 环境导出成 `.gus` 文件，任何机器载入回放（离线分析、回放禁写）；
+- **快照与 .gus**：全量快照一键恢复；整机 HII 环境导出成 `.gus` 文件，任何机器载入回放（离线分析、回放禁写）；**保存/载入按你选的盘符与目录落盘**（多分区 U 盘不会再一律写进 EFI 启动分区）；
 - **X64 / AArch64 双架构**：同一份源码构建，启动介质同时带 `BOOTX64.EFI` 与 `BOOTAA64.EFI`；
 - **分辨率自适应**：力争 ≥1280×800，高分屏上界面铺满可用区（不留大片空白），低分辨率降级提示；
 - **无需 Shell**：固件直启 `EFI/BOOT/BOOTX64.EFI`，没有 Shell 的机器一样能跑；
@@ -138,12 +153,13 @@
 
 **gsetupmod — a UEFI firmware settings browser that shows you every option your BIOS hides.**
 
-- **Fuzzy search (this update).** Exact and fuzzy are now two side-by-side buttons. The fuzzy pass normalizes case and punctuation (`VT-x` = `VT x` = `VTX`), enforces word boundaries, tolerates one-character typos, expands through a built-in 51-concept synonym table (9 groups, Chinese + English labels rendered as clickable chips — no IME, no network) and ranks by relevance. Results are **always a superset of the exact pass**, and the scan shows a progress bar with 140 ms debounce. Fuzzy hits never drop an exact hit.
+- **Fuzzy search.** Exact and fuzzy are now two side-by-side buttons. The fuzzy pass normalizes case and punctuation (`VT-x` = `VT x` = `VTX`), enforces word boundaries, tolerates one-character typos, expands through a built-in 51-concept synonym table (9 groups, Chinese + English labels rendered as clickable chips — no IME, no network) and ranks by relevance. Results are **always a superset of the exact pass**, and the scan shows a progress bar with 140 ms debounce. Fuzzy hits never drop an exact hit.
 - **Steadier pointer & touch input.** Some firmware publishes relative pointer devices without the counts-per-millimetre metadata (`Resolution`), and the spec defines 0 as "this axis does not exist" — the old logic dutifully zeroed every movement, so the cursor was painted but never moved. The app now falls back to 1 count = 1 pixel and logs a warning. The earlier hardening stays: tiered pointer instances (firmware-provided devices always outrank the app's own built-in fallback), absolute coordinates normalized over the device's declared range, and a one-shot reset plus two diagnostic log lines.
 - **Fully keyboard-drivable.** Tab cycles left navigation → form area → menu bar as a **closed loop** (Tab on the last menu button wraps back to the left column; Shift+Tab reverses it), arrows move within a pane, Tab inside an open menu behaves like ↓/↑, and **inside a dialog Tab stays within that dialog's own controls** (a list counts as one stop; its rows are walked with ↑/↓).
 - **Mouse always works — even when the firmware ships no mouse driver.** When no pointer device is found, gsetupmod loads its own built-in USB HID mouse driver and publishes it as a standard UEFI pointer, so an ordinary USB mouse just works; the **scroll wheel** is wired through as well (drag-to-scroll still there for wheel-less mice).
 - Native UEFI application: no OS, no Shell — the firmware loads `EFI\BOOT\BOOTX64.EFI` (or `BOOTAA64.EFI` on ARM64) directly from a FAT32 USB stick/ISO. The boot ISO's embedded ESP is slimmed to 5 MB — the whole ISO shrank from 20.5 MB to 10.5 MB.
-- Rebuilds the whole BIOS Setup from the firmware's live HII/IFR data, **including items the firmware hides** (orange `▓`) or disables (purple) — all readable and modifiable.
+- Rebuilds the whole BIOS Setup from the firmware's live HII/IFR data, **including items the firmware hides** (orange `▓`) — readable and modifiable.
+- **Greyed-out items are editable too (this update), behind a hard gate.** Items the firmware disables (`GRAY_OUT_IF`) stay purple and readable; editing one first raises a red warning spelling out the risk (unbootable system, broken security features, data loss), then **requires typing `YES`** — irreversibles such as "Clear TPM" escalate to `ERASE`. Touched grey items are flagged red in the save preview. **The tool takes no responsibility for the outcome.**
 - **Frosted-glass UI with dark and light theme packs** (persisted to `\gsetupmod.cfg`), plus entry transitions for dialogs and overlays.
 - **Ctrl+F search** indexes everything (hidden items, help text and plain text rows too): type "VT" to jump straight to Intel Virtualization Technology even if the standard Setup never shows it — or type "virtualization" if you never knew the acronym.
 - **Hover 1 s** to see each option's own firmware help text.
