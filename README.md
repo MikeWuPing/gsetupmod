@@ -28,7 +28,9 @@
 
 **客户拿纯键盘跑了一整轮，报回来的问题这次全部修完。** 焦点区（左栏 → 表单区 → 菜单栏）现在连成一个环：**菜单栏走到最后一个按钮再按 Tab，直接绕回左栏**；Shift+Tab 反向同一条路，任何一区都不会"进得去出不来"。**展开的菜单下拉里，Tab 与 Shift+Tab 等同 ↓ 与 ↑**（在菜单项之间移动，自动跳过置灰项），ESC 关掉下拉。
 
-**对话框里的 Tab 只在对话框自己的控件之间循环**，不会跑到背后暗掉的主界面上——写回预览、设置、搜索面板、文件对话框都一样；**列表整体算一个 Tab 位，列表里的行用 ↑↓ 走**（文件对话框因此从 20 个 Tab 位收到 5 个：盘符 / 文件列表 / 文件名 / 确定 / 取消）。
+**对话框里的 Tab 只在对话框自己的控件之间循环**，不会跑到背后暗掉的主界面上——写回预览、设置、搜索面板、文件对话框都一样；**列表整体算一个 Tab 位，列表里的行用 ↑↓ 走**。
+
+**载入对话框里那个只读的文件名框，已经不参与 Tab 了**（BUILD 191）。它只负责显示你选了哪个文件，却会被界面库自动收进焦点循环；焦点一旦走进去，Tab、Enter、ESC 全部失效，纯键盘用户只能强制重启——这是客户实测报上来的（issue #15），这版把它移出了焦点链。所以「从快照载入」现在是 **4 个 Tab 位：盘符 / 文件列表 / 确定 / 取消**，ESC 随时取消；「保存」因为要输文件名，仍是 5 个。
 
 ### 3. 🖱️ 鼠标：**固件没有鼠标驱动，插上鼠标照样能用**
 
@@ -50,7 +52,7 @@
 
 ![三色表单实拍](docs/manual/images/hidden-rows-v179.png)
 
-### 5. 置灰项也能改——先读警示，再手输 YES（本次新增）
+### 5. 置灰项也能改——先读警示，再手输 YES（BUILD 181 起）
 
 固件把某些项判灰（`GRAY_OUT_IF`），意思是"当前状态下不建议动"——可标准 Setup 既不解释原因，也不给你满足前置条件的入口。gsetupmod 把选择权交回给你，但把代价讲在前面：每次改动前弹**红色警示框**，写明可能造成**系统无法启动、安全功能失效或数据丢失**，并明确"本软件不对改动结果负责"。**必须手动输入 `YES` 再按「确定」**才放行；输错不生效，值也不会变。
 
@@ -109,14 +111,16 @@
 
 ## 📋 主要特性
 
-- **模糊搜索**（本次更新）：`精确查找` / `模糊查找` 两个并排按钮、51 个概念 chip（9 组）、同义词表内置不联网、模糊结果恒为精确的超集、扫描带进度条与 140 ms 防抖；
+- **模糊搜索**：`精确查找` / `模糊查找` 两个并排按钮、51 个概念 chip（9 组）、同义词表内置不联网、模糊结果恒为精确的超集、扫描带进度条与 140 ms 防抖；
 - **指针/触摸更稳**：固件没填"每毫米计数"（`Resolution=0`）时按 1 计数 = 1 像素兜底，位移不再被整体丢弃（"光标画得出却钉住不动"那一类）；指针实例分层（固件实例优先于内建兜底实例）、绝对坐标按设备实际量程归一、选中后复位一次并带两条诊断日志；
 - **纯键盘全可用**：Tab 在左栏 / 表单区 / 菜单栏之间**成环换区**（菜单栏末按钮绕回左栏），↑↓ 区内移动，下拉内 Tab 等同 ↓↑，**对话框内 Tab 只在框内控件之间循环**；
+- **文件对话框纯键盘可用**（BUILD 191）：载入对话框 4 个 Tab 位（盘符 / 文件列表 / 确定 / 取消）、保存 5 个，↑↓ 选文件、Enter 确认、ESC 随时取消；此前只读文件名框会把焦点吸住，Tab / Enter / ESC 全失效；
+- **简体固件按简体显示**（BUILD 191）：固件字符串包用旧式 `zh-cht` / `zh-chs` 标签时按简体优先匹配，不再在简体系统上误取繁体实例、撞上字库盲区显示成片方框；内置字库同时补入该机型缺失的常用繁体字；
 - **鼠标全支持**：**固件无鼠标驱动时由内建 USB HID 驱动接管**；滚轮滚动；无滚轮可按住左键拖动；
 - **毛玻璃界面 + 深/浅两档主题**（选择持久化到 `\gsetupmod.cfg`），对话框与弹层带转场动效；
 - **完整 HII 枚举**：汇总全部固件驱动注册的设置表单，几十个 formset 一个界面；
 - **隐藏项展示+修改**（独家）、三色语义、真实 IFR 表达式求值；
-- **置灰项可编辑**（本次新增）：红色警示框 + 手输 `YES`（清除 TPM 类需 `ERASE`），改动过的项在写回预览里标红；
+- **置灰项可编辑**（BUILD 181 起）：红色警示框 + 手输 `YES`（清除 TPM 类需 `ERASE`），改动过的项在写回预览里标红；
 - **全量搜索**（隐藏项可搜，索引含问题行 / 跳转行 / 帮助文本 / 纯文本行）、**悬停帮助**；
 - **图形化编辑**：勾选滑轨 / 单选胶囊与列表 / 数值步进器 / 文本面板，鼠标键盘双通道；
 - **按需写回**：只写实际改过的变量（未改动整体跳过），逐项报告，`Security Violation` 点名；
@@ -155,11 +159,12 @@
 
 - **Fuzzy search.** Exact and fuzzy are now two side-by-side buttons. The fuzzy pass normalizes case and punctuation (`VT-x` = `VT x` = `VTX`), enforces word boundaries, tolerates one-character typos, expands through a built-in 51-concept synonym table (9 groups, Chinese + English labels rendered as clickable chips — no IME, no network) and ranks by relevance. Results are **always a superset of the exact pass**, and the scan shows a progress bar with 140 ms debounce. Fuzzy hits never drop an exact hit.
 - **Steadier pointer & touch input.** Some firmware publishes relative pointer devices without the counts-per-millimetre metadata (`Resolution`), and the spec defines 0 as "this axis does not exist" — the old logic dutifully zeroed every movement, so the cursor was painted but never moved. The app now falls back to 1 count = 1 pixel and logs a warning. The earlier hardening stays: tiered pointer instances (firmware-provided devices always outrank the app's own built-in fallback), absolute coordinates normalized over the device's declared range, and a one-shot reset plus two diagnostic log lines.
-- **Fully keyboard-drivable.** Tab cycles left navigation → form area → menu bar as a **closed loop** (Tab on the last menu button wraps back to the left column; Shift+Tab reverses it), arrows move within a pane, Tab inside an open menu behaves like ↓/↑, and **inside a dialog Tab stays within that dialog's own controls** (a list counts as one stop; its rows are walked with ↑/↓).
+- **Fully keyboard-drivable.** Tab cycles left navigation → form area → menu bar as a **closed loop** (Tab on the last menu button wraps back to the left column; Shift+Tab reverses it), arrows move within a pane, Tab inside an open menu behaves like ↓/↑, and **inside a dialog Tab stays within that dialog's own controls** (a list counts as one stop; its rows are walked with ↑/↓). **The load dialog's read-only filename box no longer takes a Tab stop (BUILD 191)** — it used to be auto-added to the focus loop and, once focused, swallowed Tab/Enter/ESC; the load dialog is now 4 stops (drive / file list / OK / Cancel), the save dialog 5.
 - **Mouse always works — even when the firmware ships no mouse driver.** When no pointer device is found, gsetupmod loads its own built-in USB HID mouse driver and publishes it as a standard UEFI pointer, so an ordinary USB mouse just works; the **scroll wheel** is wired through as well (drag-to-scroll still there for wheel-less mice).
 - Native UEFI application: no OS, no Shell — the firmware loads `EFI\BOOT\BOOTX64.EFI` (or `BOOTAA64.EFI` on ARM64) directly from a FAT32 USB stick/ISO. The boot ISO's embedded ESP is slimmed to 5 MB — the whole ISO shrank from 20.5 MB to 10.5 MB.
 - Rebuilds the whole BIOS Setup from the firmware's live HII/IFR data, **including items the firmware hides** (orange `▓`) — readable and modifiable.
-- **Greyed-out items are editable too (this update), behind a hard gate.** Items the firmware disables (`GRAY_OUT_IF`) stay purple and readable; editing one first raises a red warning spelling out the risk (unbootable system, broken security features, data loss), then **requires typing `YES`** — irreversibles such as "Clear TPM" escalate to `ERASE`. Touched grey items are flagged red in the save preview. **The tool takes no responsibility for the outcome.**
+- **Greyed-out items are editable too (BUILD 181+), behind a hard gate.** Items the firmware disables (`GRAY_OUT_IF`) stay purple and readable; editing one first raises a red warning spelling out the risk (unbootable system, broken security features, data loss), then **requires typing `YES`** — irreversibles such as "Clear TPM" escalate to `ERASE`. Touched grey items are flagged red in the save preview. **The tool takes no responsibility for the outcome.**
+- **Simplified-Chinese firmware shows simplified text (BUILD 191).** String packages tagged with the legacy `zh-cht` / `zh-chs` labels are matched simplified-first, so a simplified locale no longer picks the traditional instance and paints boxes; the missing common traditional glyphs of that machine were added to the built-in font.
 - **Frosted-glass UI with dark and light theme packs** (persisted to `\gsetupmod.cfg`), plus entry transitions for dialogs and overlays.
 - **Ctrl+F search** indexes everything (hidden items, help text and plain text rows too): type "VT" to jump straight to Intel Virtualization Technology even if the standard Setup never shows it — or type "virtualization" if you never knew the acronym.
 - **Hover 1 s** to see each option's own firmware help text.
